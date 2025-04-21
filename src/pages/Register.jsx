@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
-import { registerFields } from './formFields';
 
-export const registerFields = [
-    { label: 'Username', name: 'username', type: 'text', required: true },
-    { label: 'Email', name: 'email', type: 'email', required: true },
-    { label: 'Password', name: 'password', type: 'password', required: true },
-    { label: 'Confirm Password', name: 'confirmPassword', type: 'password', required: true },
+const registerFields = [
+  { label: 'Username', name: 'username', type: 'text', required: true },
+  { label: 'Email', name: 'email', type: 'email', required: true },
+  { label: 'Password', name: 'password', type: 'password', required: true },
+  { label: 'Confirm Password', name: 'confirmPassword', type: 'password', required: true },
 ];
 
 const RegisterForm = () => {
   const [formData, setFormData] = useState(
-    registerFields.reduce((acc, field) => ({ ...acc, [field.name]: '' }), {})
+    registerFields.reduce((acc, field) => {
+      acc[field.name] = '';
+      return acc;
+    }, {})
   );
 
   const [errors, setErrors] = useState({});
@@ -24,14 +26,14 @@ const RegisterForm = () => {
 
   const validate = () => {
     const newErrors = {};
-    registerFields.forEach((field) => {
-      if (field.required && !formData[field.name]) {
-        newErrors[field.name] = `${field.label} is required`;
+    registerFields.forEach(({ name, label, required }) => {
+      if (required && !formData[name]) {
+        newErrors[name] = `${label} is required`;
       }
     });
 
     if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = "Passwords don't match";
+      newErrors.confirmPassword = 'Passwords do not match';
     }
 
     return newErrors;
@@ -43,31 +45,42 @@ const RegisterForm = () => {
 
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
-      return;
-    }
+    } else {
+      // Simulated response (you would get this from your backend API)
+      const fakeResponse = {
+        user: {
+          username: formData.username,
+          email: formData.email,
+          password: formData.password,
+        },
+      };
 
-    console.log('Submitted:', formData);
-    setSubmitted(true);
+      // Save JWT and user to localStorage
+      localStorage.setItem('user', JSON.stringify(fakeResponse.user));
+
+    //   console.log('user saved to localStorage.');
+      console.log('Form Submitted:', formData);
+
+      setSubmitted(true);
+    }
   };
 
   return (
     <div style={{ maxWidth: '400px', margin: 'auto' }}>
-      <h2>Dynamic Register Form</h2>
-      {submitted && <p style={{ color: 'green' }}>Registration successful!</p>}
+      <h2>Register</h2>
+      {submitted && <p style={{ color: 'green' }}>Registration Successful!</p>}
 
       <form onSubmit={handleSubmit}>
-        {registerFields.map((field) => (
-          <div key={field.name} style={{ marginBottom: '12px' }}>
-            <label>{field.label}:</label><br />
+        {registerFields.map(({ label, name, type }) => (
+          <div key={name} style={{ marginBottom: '10px' }}>
+            <label>{label}:</label><br />
             <input
-              type={field.type}
-              name={field.name}
-              value={formData[field.name]}
+              type={type}
+              name={name}
+              value={formData[name]}
               onChange={handleChange}
             />
-            {errors[field.name] && (
-              <div style={{ color: 'red' }}>{errors[field.name]}</div>
-            )}
+            {errors[name] && <div style={{ color: 'red' }}>{errors[name]}</div>}
           </div>
         ))}
 
